@@ -1,0 +1,48 @@
+stages:
+  - validate
+  - plan
+  - apply
+
+image: hashicorp/terraform:1.6.6
+
+validate:
+  stage: validate
+  script:
+    - terraform validate
+  only:
+    changes:
+      - "*.tf"
+      - "**/*.tf"
+
+checkov:
+  image: bridgecrew/checkov:latest
+  stage: validate
+  script:
+    - checkov -d .
+  allow_failure: true
+
+tflint:
+  image: wata727/tflint:latest
+  stage: validate
+  script:
+    - tflint
+  allow_failure: true
+
+plan:
+  stage: plan
+  script:
+    - apk add gettext
+    - terraform init -backend=true -get=true -input=false
+    - terraform plan -out=plan -parallelism=25 -var-file=$TFVARS_FILE
+  artifacts:
+    name: plan
+    paths:
+      - plan
+    expire_in: 1 hour
+
+apply:
+  stage: apply
+  script:
+    - terraform init -backend=true -get=true -input=false
+    - terraform apply "plan"
+  when: "manual"

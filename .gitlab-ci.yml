@@ -1,0 +1,79 @@
+
+stages:
+  - trigger-child
+
+.infra-trigger-child: &infra-trigger-child
+  stage: trigger-child
+  trigger:
+    include:
+      - local: $CHILD_MODULE_DIR/.gitlab-ci.yml
+
+cloud_sql:
+  variables:
+    CHILD_MODULE_DIR: cloud_sql
+  <<: *infra-trigger-child
+  rules:
+    - if: $CI_MERGE_REQUEST_ID || $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - cloud_sql/*
+      when: always
+    - if: '($CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "schedule") && $MODULE_DIR == "cloud_sql"'
+      when: always
+    - if: '$RUN_ALL == "true"'
+      when: always
+
+cloud_storage:
+  variables:
+    CHILD_MODULE_DIR: cloud_storage
+  <<: *infra-trigger-child
+  rules:
+    - if: $CI_MERGE_REQUEST_ID || $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - cloud_storage/*
+      when: always
+    - if: '($CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "schedule") && $MODULE_DIR == "cloud_storage"'
+      when: always
+    - if: '$RUN_ALL == "true"'
+      when: always
+
+gke:
+  variables:
+    CHILD_MODULE_DIR: gke
+  <<: *infra-trigger-child
+  rules:
+    - if: $CI_MERGE_REQUEST_ID || $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - gke/*
+      when: always
+    - if: '($CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "schedule") && $MODULE_DIR == "gke"'
+      when: always
+    - if: '$RUN_ALL == "true"'
+      when: always
+
+iam:
+  variables:
+    CHILD_MODULE_DIR: iam
+  <<: *infra-trigger-child
+  rules:
+    - if: $CI_MERGE_REQUEST_ID || $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - iam/*
+      when: always
+    - if: '($CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "schedule") && $MODULE_DIR == "iam"'
+      when: always
+    - if: '$RUN_ALL == "true"'
+      when: always
+
+networking:
+  variables:
+    CHILD_MODULE_DIR: networking
+  <<: *infra-trigger-child
+  rules:
+    - if: $CI_MERGE_REQUEST_ID || $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - networking/*
+      when: always
+    - if: '($CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "schedule") && $MODULE_DIR == "networking"'
+      when: always
+    - if: '$RUN_ALL == "true"'
+      when: always
